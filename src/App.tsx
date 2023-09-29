@@ -1,8 +1,8 @@
-import { ThemeProvider } from 'styled-components';
+import { ThemeProvider } from 'styled-components'
 
-import { Button } from './components/Button';
-import { defaultTheme } from './styles/themes/default';
-import { GlobalStyle } from './styles/global';
+import { Button } from './components/Button'
+import { defaultTheme } from './styles/themes/default'
+import { GlobalStyle } from './styles/global'
 
 export const App = () => {
   return (
@@ -15,5 +15,5 @@ export const App = () => {
       <Button variant={'success'} />
       <Button />
     </ThemeProvider>
-  );
-};
+  )
+}
