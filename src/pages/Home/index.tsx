@@ -21,7 +21,7 @@ const newCycleFormValidationSchema = zod.object({
   task: zod.string().min(1, 'Inform the task'),
   minutesAmount: zod
     .number()
-    .min(5, 'The cycle needs to be at least 5 minutes')
+    .min(1, 'The cycle needs to be at least 5 minutes')
     .max(60, 'The cycle needs to be at most 60 minutes'),
 })
 
@@ -29,6 +29,7 @@ type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
 interface Cycle {
   id: string
+  finishedDate?: Date
   interruptedDate?: Date
   minutesAmount: number
   startDate: Date
@@ -43,6 +44,44 @@ export const Home = () => {
   const { handleSubmit, register, reset, watch } = useForm<NewCycleFormData>({
     resolver: zodResolver(newCycleFormValidationSchema),
   })
+
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
+
+  useEffect(() => {
+    let interval: number
+
+    if (activeCycle) {
+      interval = setInterval(() => {
+        const secondsDifference = differenceInSeconds(
+          new Date(),
+          activeCycle.startDate,
+        )
+
+        if (secondsDifference >= totalSeconds) {
+          setCycles((state) =>
+            state.map((cycle) => {
+              if (cycle.id === activeCycleId) {
+                return { ...cycle, finishedDate: new Date() }
+              }
+
+              return cycle
+            }),
+          )
+
+          setAmountSecondsPassed(totalSeconds)
+          clearInterval(interval)
+        } else {
+          setAmountSecondsPassed(secondsDifference)
+        }
+      }, 1000)
+    }
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [activeCycle, activeCycleId, totalSeconds])
 
   const handleCreateNewCircle = (data: NewCycleFormData) => {
     const id = String(new Date().getTime())
@@ -75,25 +114,6 @@ export const Home = () => {
     setActiveCycleId(null)
   }
 
-  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
-
-  useEffect(() => {
-    let interval: number
-
-    if (activeCycle) {
-      interval = setInterval(() => {
-        setAmountSecondsPassed(
-          differenceInSeconds(new Date(), activeCycle.startDate),
-        )
-      }, 1000)
-    }
-
-    return () => {
-      clearInterval(interval)
-    }
-  }, [activeCycle])
-
-  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
   const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
 
   const minutesAmount = Math.floor(currentSeconds / 60)
@@ -109,7 +129,6 @@ export const Home = () => {
   }, [minutes, seconds, activeCycle])
 
   const task = watch('task')
-
   const isSubmitDisabled = !task
 
   return (
@@ -138,7 +157,7 @@ export const Home = () => {
             id="minutesAmount"
             placeholder="00"
             step={5}
-            min={5}
+            min={1}
             max={60}
             disabled={!!activeCycle}
             {...register('minutesAmount', { valueAsNumber: true })}
@@ -158,7 +177,7 @@ export const Home = () => {
             <HandPalm size={24} /> Stop
           </StopCountdownButton>
         ) : (
-          <StartCountdownButton type="submit" disabled={isSubmitDisabled}>
+          <StartCountdownButton disabled={isSubmitDisabled} type="submit">
             <Play size={24} /> Start
           </StartCountdownButton>
         )}
