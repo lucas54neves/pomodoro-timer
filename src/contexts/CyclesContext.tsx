@@ -18,6 +18,7 @@ interface CycleContextType {
   activeCycle: Cycle | undefined
   activeCycleId: string | null
   amountSecondsPassed: number
+  cycles: Cycle[]
   createNewCircle: (data: CreateCycleData) => void
   interruptCycle: () => void
   markCurrentCycleAsFinished: () => void
@@ -90,6 +91,7 @@ export const CyclesContextProvider = ({
         activeCycle,
         activeCycleId,
         amountSecondsPassed,
+        cycles,
         createNewCircle,
         interruptCycle,
         markCurrentCycleAsFinished,
