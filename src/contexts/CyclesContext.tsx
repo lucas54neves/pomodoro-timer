@@ -53,7 +53,7 @@ export const CyclesContextProvider = ({
         return {
           ...state,
           cycles: state.cycles.map((cycle) => {
-            if (cycle.id === action.payload.activeCycleId) {
+            if (cycle.id === state.activeCycleId) {
               return { ...cycle, interruptedDate: new Date() }
             } else {
               return cycle
@@ -99,7 +99,7 @@ export const CyclesContextProvider = ({
 
   const interruptCycle = () => {
     dispatch({
-      type: 'INTERRUPT_CYCLE',
+      type: 'INTERRUPT_CURRENT_CYCLE',
       payload: {
         activeCycleId,
       },
